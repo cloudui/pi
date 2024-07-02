@@ -15,8 +15,11 @@ package piimpl
 */
 
 // #include <stdlib.h>
-// #include	"mypigpio.h"
+// #include <pigpiod_if2.h>
+// #include	"pigpio.h"
 // #include "pi.h"
+// cgo LDFLAGS: -lpigpiod_if2
+
 import "C"
 
 import (

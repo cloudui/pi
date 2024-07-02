@@ -5,7 +5,7 @@ go 1.21.9
 require (
 	github.com/pkg/errors v0.9.1
 	go.uber.org/multierr v1.11.0
-	go.viam.com/api v0.1.311
+	go.viam.com/api v0.1.317
 	go.viam.com/rdk v0.29.2
 	go.viam.com/utils v0.1.83
 )
