@@ -33,6 +33,31 @@ type Config struct {
 	// DigitalInterrupts []DigitalInterruptConfig            `json:"digital_interrupts,omitempty"`
 }
 
+type gpioPin struct {
+	pi   *daemonBoard
+	bcom int
+}
+
+// PWM implements board.GPIOPin.
+func (gp gpioPin) PWM(ctx context.Context, extra map[string]interface{}) (float64, error) {
+	panic("unimplemented")
+}
+
+// PWMFreq implements board.GPIOPin.
+func (gp gpioPin) PWMFreq(ctx context.Context, extra map[string]interface{}) (uint, error) {
+	panic("unimplemented")
+}
+
+// SetPWM implements board.GPIOPin.
+func (gp gpioPin) SetPWM(ctx context.Context, dutyCyclePct float64, extra map[string]interface{}) error {
+	panic("unimplemented")
+}
+
+// SetPWMFreq implements board.GPIOPin.
+func (gp gpioPin) SetPWMFreq(ctx context.Context, freqHz uint, extra map[string]interface{}) error {
+	panic("unimplemented")
+}
+
 // init registers a pi board based on pigpio.
 func init() {
 	resource.RegisterComponent(
@@ -159,9 +184,14 @@ func (d *daemonBoard) DigitalInterruptByName(name string) (board.DigitalInterrup
 }
 
 // GPIOPinByName returns a GPIOPin by name.
-func (d *daemonBoard) GPIOPinByName(name string) (board.GPIOPin, error) {
-	return nil, nil
-
+func (pi *daemonBoard) GPIOPinByName(pin string) (board.GPIOPin, error) {
+	pi.mu.Lock()
+	defer pi.mu.Unlock()
+	bcom, have := broadcomPinFromHardwareLabel(pin)
+	if !have {
+		return nil, errors.Errorf("no hw pin for (%s)", pin)
+	}
+	return gpioPin{pi, int(bcom)}, nil
 }
 
 // AnalogNames returns the names of all known analog pins.
@@ -271,11 +301,6 @@ func (pi *daemonBoard) SetGPIOBcom(bcom int, high bool) error {
 	}
 	C.gpio_write(C.int(pi.piID), C.uint(bcom), C.uint(v))
 	return nil
-}
-
-type gpioPin struct {
-	pi   *daemonBoard
-	bcom int
 }
 
 func (gp gpioPin) Set(ctx context.Context, high bool, extra map[string]interface{}) error {
